@@ -23,7 +23,7 @@ namespace Customer
         {
             lock (this)
             {
-                Console.WriteLine("Customer " + customerID + " is running. Waiting for a reply.");
+                Console.WriteLine("Customer " + customerID + " is running. Waiting for a reply." + "Product ID: " + productID);                
             }
 
             OrderRequestMessage request = new OrderRequestMessage
@@ -33,13 +33,19 @@ namespace Customer
                 Country = country
             };
 
+            //Console.WriteLine(request.CustomerId);
+
             using (IBus bus = RabbitHutch.CreateBus("host=localhost;persistentMessages=false"))
             {
                 // Listen to reply messages from the Retailer (use Topic Based Routing).
                 // WRITE CODE HERE!
 
+                bus.PubSub.Subscribe<OrderReplyMessage>("customer" + customerID.ToString(), HandleOrderEvent);
+
                 // Send an order request message to the Retailer (use a point-to-point channel).
                 // WRITE CODE HERE!
+
+                bus.SendReceive.Send("customerToRetailerQueue", request);
 
                 // Block this thread so that the customer instance will not exit.
                 Console.ReadLine();

@@ -20,6 +20,7 @@ using (bus = RabbitHutch.CreateBus("host=localhost;persistentMessages=false"))
 
     // Listen for order reply messages from warehouses (use a point-to-point channel).
     // WRITE CODE HERE!
+    bus.SendReceive.Receive<OrderReplyMessage>("warehouseToRetailerQueue", message => HandleOrderReply(message));
 
     // Block this thread so that the retailer program will not exit.
     Console.ReadLine();
@@ -32,6 +33,7 @@ void HandleOrderRequest(OrderRequestMessage message)
 
     // Send an order request message to all warehouses (publish-subscribe channel).
     // WRITE CODE HERE!
+    bus.PubSub.Publish<OrderRequestMessage>(message);
 
     lock (lockObject)
     {
